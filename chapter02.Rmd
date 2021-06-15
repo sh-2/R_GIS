@@ -1,0 +1,89 @@
+# RによるGIS分析の例
+
+RでGIS分析を行うとどんな風になるのか、例として簡単に示しておきます。今は何をやっているのか分からなくても大丈夫です。雰囲気を掴むだけで十分です。
+
+## ベクターデータ(shapeファイル)
+
+
+**sfパッケージを用いて読み込み**  
+例として東京23区のデータを使います。
+```{r message=FALSE, results='hide'}
+library(sf)
+tokyo23 <- st_read("tokyo/tokyo_23ku_jgd2011_9.shp")
+```
+
+データの中身を確認
+```{r echo=FALSE}
+tokyo23
+```
+
+データの描写
+```{r message=FALSE}
+library(tmap)
+tmap_mode("view")
+tm_shape(tokyo23) +
+  tm_polygons() 
+```
+
+
+
+## ラスターデータ
+**starsパッケージを用いて読み込み**  
+例としてGoogle earth engineから取得したDMSPの夜間光データを使います。
+```{r message=FALSE, results='hide'}
+library(stars)
+nightlight <- read_stars("DMSP_nightlight_tokyo.tif")
+```
+
+
+データの中身を確認
+```{r echo=FALSE}
+nightlight
+```
+
+
+データの描写
+```{r message=FALSE}
+library(mapview)
+mapview(nightlight)
+```
+<br />
+以上がRによるGIS分析の簡単な例（雰囲気）です。詳しくは以降のページで説明していきます。
+
+<br />
+
+使用データ
+
++ [GIS実習オープン教材](https://gis-oer.github.io/gitbook/book/materials/QGIS/QGIS.html#%E3%83%87%E3%83%BC%E3%82%BF%E3%81%AE%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF)  
++ Google Earth Engine, DMSPデータ取得コード例(暫定)
+```
+var DMSP = ee.ImageCollection("NOAA/DMSP-OLS/CALIBRATED_LIGHTS_V4")
+                .filter(ee.Filter.date('1996-03-16','2011-07-31'));
+var nighttimeLights = DMSP.select('avg_vis');
+var nighttimeLightsVis = {
+  min: 0.0,
+  max: 6060.6,
+};
+Map.addLayer(nighttimeLights, nighttimeLightsVis, 'Nighttime Lights');
+
+var geometry = 
+    /* color: #d63000 */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[137.51419443546948, 36.6164990646143],
+          [137.51419443546948, 32.6033812385218],
+          [142.90848154484448, 32.6033812385218],
+          [142.90848154484448, 36.6164990646143]]], null, false);
+
+var DMSP_nightlight_tokyo = DMSP.filterDate("2010-01-01","2010-12-31").mean();
+Export.image.toDrive({
+            image: DMSP_nightlight_tokyo.toFloat(),
+            scale: 500, 
+            description: 'DMSP_nightlight_tokyo',
+            region: geometry
+});
+```

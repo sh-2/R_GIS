@@ -1,0 +1,12 @@
+bookdown::gitbook:
+  css: style.css
+  config:
+    toc:
+      collapse: subsection
+      scroll_highlight: yes
+      before: |
+        <li><a href="./">RでGIS分析</a></li>
+      after: |
+        <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+      download: ["pdf", "epub"]
+  split_by: "section"

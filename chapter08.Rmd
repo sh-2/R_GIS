@@ -1,0 +1,88 @@
+```{r, message=FALSE, echo=FALSE}
+library(tmap)
+library(sf)
+library(stars)
+tmap_mode("view")
+library(dplyr)
+library(data.table)
+```
+
+
+
+# ラスターデータからベクターデータへの抽出
+この章ではラスターデータの値をベクターデータに集計する方法を説明します。（この章がもっとも使用頻度の高い章かもしれません。）  
+例として、具体的には夜間光を行政区ごとに抽出します。これによって行政区ごとの光の強さが分かります。光の強さは経済活動(GDP)と相関が強いことが知られているため、正確な統計がない場合でも経済活動指標の代替として利用できる変数を作成できます。では実際にやってみましょう。  
+
+<br />
+ベクターデータとラスターデータを同じCRSにして準備をします。(tokyoやnightilightのデータは操作が多くなっているので、一度読みなおします。)  
+
+```{r message=FALSE, results='hide'}
+tokyo23 <- st_read("tokyo/tokyo_23ku_jgd2011_9.shp") %>%
+  st_transform(32654)
+
+nightlight <- read_stars("DMSP_nightlight_tokyo.tif") %>%
+  st_transform(32654) 
+```
+ベクターデータとラスターデータを用意したら、`aggregate`関数を使用するだけです。これで、区毎の夜間光平均が求められます。
+
+
+<br />
+`aggregate`関数の使い方
+```
+aggregate(starsデータ, sfデータ,  FUN = 使いたい関数)
+```
+
+ではやってみましょう。今回はFUNをmeanとして、行政区毎の夜間光平均を求めます。
+```{r}
+#行政区毎に夜間光の平均を抽出します。
+agg_light <- aggregate(nightlight, tokyo23, FUN = mean)
+
+#作成したagg_lightのクラスを確認します。
+class(agg_light)
+```
+
+
+<br />
+このままではsfデータではなくstarsデータになっているのでので`st_as_sf`関数を使ってsfデータに変換します。
+```{r}
+agg_light <- st_as_sf(agg_light)
+```
+<br />
+これでsfデータになりました。
+
+<br />
+取得したデータを表示して、確認してみましょう。
+```{r message=FALSE}
+tm_shape(agg_light) +
+  tm_polygons(col = "avg_vis")#avg_vis(band1)で色分けして表示します。
+```
+
+<br />
+23区の中心に行くほど平均夜間光が強くなっていることが分かると思います。ただしこのままでは、agg_lightは夜間光とポリゴンのみのデータになっているので、使い勝手が悪いです。  
+最後にtokyo23とagg_lightのデータを結合して終わりにしましょう。 
+
+<br />
+結合のために`left_join`関数を使います。（今回キーにできる変数がgeometryしかなく、`merge`関数はgeometry(list型)をキーとして使えません。）  
+sfとsf同士の結合はできないため、結合する側(agg_light)をdata.table型に変換します。(starsやdata.frameでも構いません。)
+```{r}
+agg_light <- data.table(agg_light)
+```
+
+<br />
+準備ができたので、結合(left_join)します。  
+<br />
+`left_join`使い方(sfデータのとき)
+```
+left_join(sfデータ, 非sfデータ, by="キー")
+```
+```{r}
+#結合
+tokyo23_light <- left_join(tokyo23, agg_light, by="geometry")
+
+#tokyo23_lightの中身を確認
+head(tokyo23_light)
+```
+
+<br />
+これでtokyo23,とagg_lightを結合したtokyo23_lightというデータが作成されました。夜間光のデータとその他のデータが格納されたsfデータの完成です。  
+「sf × starsの抽出 → それらの結合」は少しややこしいですが、ここまでできれば、後は好きなように分析を行うことができます。

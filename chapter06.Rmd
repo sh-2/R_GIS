@@ -1,0 +1,169 @@
+```{r include=FALSE}
+library(sf)
+library(tmap)
+library(dplyr)
+tmap_mode("view")
+tokyo23 <- st_read("tokyo/tokyo_23ku_jgd2011_9.shp") %>%
+  st_transform(32654)
+post <- st_read("tokyo/post_office_9kei.shp") %>%
+  st_transform(32654)
+```
+
+
+
+# sfデータ × sfデータの操作
+このchapterではsfデータ同士の操作を説明します。ある範囲内にあるデータのみを扱いたい場合などを想定しています。
+
+## ポイントとポリゴン
+post_oficeのデータには23区以外の郵便局のデータもありました。しかし23区内にある郵便局のみを分析単位としたい時があります。そんなときに、これから説明する操作が必要です。  
+まず、2つのデータを重ね合わせてみましょう。
+```{r}
+tm_shape(post) +
+  tm_symbols(size = 0.1) +
+tm_shape(tokyo23) +
+  tm_polygons(col = "blue", alpha = 0.1) 
+```
+
+<br />
+23区外にも多くの郵便局のデータがあります。23区内のpostデータだけが欲しい場合は以下のように書くだけです。
+```{r}
+#新しい変数 <- 対象のsfデータ[基準・範囲となるsfデータ] 
+post_in23 <- post[tokyo23,]
+```
+では、あたらしくできたpost_in23を、23区の行政区と重ね合わせて見てみましょう
+```{r}
+tm_shape(post_in23) +
+  tm_symbols(size = 0.1) +
+tm_shape(tokyo23) +
+  tm_polygons(col = "blue", alpha = 0.1) 
+```
+
+上図のようにpost_in23はpostの中でtokyo23のポリゴン内のみのデータとなりました。  
+これと近いことができる、`st_intersects`という関数もあります。この関数は基準となるsfデータ（ポリゴン）の中に対象のデータがあるのかをTRUE / FALSEで返します。  
+
+23区内にあるかないかのデータが欲しいので、その基準となる23区全体で一つのpolygonを作成しておきます。これには`st_union`関数を使います。
+```{r}
+#st_unionで複数のポリゴンを結合し一つのポリゴンにします
+tokyo_union <- tokyo23 %>% 
+  st_union()
+
+#1つのポリゴンにしたものを表示
+tokyo_union %>% plot()
+```
+
+
+
+
+
+`st_intersects`の使い方
+```
+st_intersects(対象のsfデータ, 基準ポリゴン, sparse = FALSE)
+```
+```{r}
+intersects_in23 <- st_intersects(post, tokyo_union, sparse = FALSE)
+```
+
+<br />
+このままでは変数として使えないので、mutate関数で変数としてpostに付け足します。
+```{r}
+post <- mutate(post, intersects_in23  = intersects_in23)
+```
+
+postデータをintersects_in23に合わせて色分けして表示してみます。
+```{r}
+tm_shape(post) +
+  tm_symbols('intersects_in23', palette="Spectral", contrast=.5,　size = 0.1) +
+tm_shape(tokyo23) +
+  tm_polygons(col = "blue", alpha = 0.1) 
+```
+
+<br />
+範囲外はFlase（赤）、範囲内はTrue（緑）としたデータが作成されました。ダミー変数が必要な時にこの操作が便利だと思います。
+
+## ラインとポリゴン
+ラインもポイントとほとんど同じように操作できます。  
+ラインの例として地下鉄のデータを読み込みます。
+```{r message=FALSE, include=FALSE}
+subway <- st_read("tokyo/subway_9kei.shp") %>%
+  st_transform(32654)
+```
+```{r}
+tm_shape(tokyo23) +
+  tm_polygons() +
+
+tm_shape(subway) +
+  tm_lines(col = "blue", alpha = 0.3)
+```
+
+<br />
+神奈川県にも地下鉄は走っているので、南西にも一部ラインが表示されています。ポイントと同じ操作をすることで、この神奈川県の地下鉄を外したデータを作ることができます。
+```{r}
+subway_in23 <- subway[tokyo23, ]
+```
+```{r}
+tm_shape(subway_in23) +
+  tm_lines(col = "blue") +
+tm_shape(tokyo23) +
+  tm_polygons(alpha = 0)  +
+  tm_layout(frame = FALSE) 
+```
+
+<br />
+subway_in23では神奈川県の地下鉄のデータが消えました。  
+ポイントでは23区に掛かっているかどうかTRUE / FALSEの変数をst_intersectsで作りましたが、ラインデータでは少し大変です。`lapply`関数等を使います。(加筆予定？)
+
+## join
+`st_join`関数を使えば、sfデータを他のsfデータから抽出することができます。
+
+### ポリゴンからポイントへ抽出
+tokyo23(ポリゴン)のデータを、その上にあるポイント(post_in23)へ抽出してみます。（各郵便局が、自身の属する行政区のデータを得ます。）  
+`st_join`の使い方
+```
+st_join(抽出先sfデータ, 抽出元sfデータ)
+```
+```{r}
+point_join <- st_join(post_in23, tokyo23)
+head(point_join)
+```
+
+表のように、post_in23に、属するポリゴンデータ(tokyo23)からデータが抽出されました。(2つのデータ間nameという同じ変数名があったため、name.x, name.yという風に自動で区別されます。)
+
+### ポイントからポリゴンへ抽出
+同じようにst_joinで操作できます。  
+やってみましょう
+```{r}
+polygon_join <- st_join(tokyo23, post_in23)
+```
+```{r}
+head(polygon_join)
+```
+上の表のように、ポリゴンへポイントをjoinすると1.1, 1.2, 1.3,...という風に北区の中にある郵便局が列挙され、その次に2.1, 2.2,...というデータ構造になります。  
+
+- 区１
+  - 郵便局1.1
+  - 郵便局1.2
+  - 郵便局1.3
+  - 　：
+- 区２
+  - 郵便局2.1
+  - 郵便局2.2
+  - 郵便局2.3
+  - 　：
+
+<br />
+このままではあまり使えないので、区の中の郵便局の数を数えてみましょう。  
+```{r}
+polygon_join %>%
+  group_by(name.x) %>%
+  summarise(post_count = n())
+```
+summarize関数の中身を変えれば区レベルで色々な分析ができます。(postのデータの変数がもっとあれば色々な分析も可能です。)
+
+<br />
+この場合、st_joinを使わなくてもaggregate関数を使っても同じこともできます。sfデータは通常のデータを扱うように操作できるためです。(むしろst_join関数を使うよりも簡単です。)
+
+```{r}
+#23区それぞれにあるpost officeの数(length)を集計します。
+aggregate(post_in23, tokyo23, FUN = length)
+```
+

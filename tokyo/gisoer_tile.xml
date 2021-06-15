@@ -1,0 +1,19 @@
+<!DOCTYPE connections>
+<qgsXYZTilesConnections version="1.0">
+    <xyztiles username="" name="a_地理院タイル_標準地図" password="" authcfg="" zmin="2" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png" zmax="18"/>
+    <xyztiles username="" name="b_地理院タイル_淡色地図" password="" authcfg="" zmin="2" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png" zmax="18"/>
+    <xyztiles username="" name="c_地理院タイル__English" password="" authcfg="" zmin="5" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/english/{z}/{x}/{y}.png" zmax="11"/>
+    <xyztiles username="" name="d_地理院タイル_色別標高図" password="" authcfg="" zmin="5" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png" zmax="15"/>
+    <xyztiles username="" name="e_地理院タイル_(全国最新写真（シームレス））" password="" authcfg="" zmin="2" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg" zmax="18"/>
+    <xyztiles username="" name="f_国土画像情報 (第一期：1974～1978年撮影)" password="" authcfg="" zmin="10" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/gazo1/{z}/{x}/{y}.jpg" zmax="17"/>
+    <xyztiles username="" name="g_国土画像情報 (第二期：1979～1983年撮影)" password="" authcfg="" zmin="15" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/gazo2/{z}/{x}/{y}.jpg" zmax="17"/>
+    <xyztiles username="" name="h_国土画像情報 (第三期：1984～1986年撮影)" password="" authcfg="" zmin="15" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/gazo3/{z}/{x}/{y}.jpg" zmax="17"/>
+    <xyztiles username="" name="i_国土画像情報 (第四期：1988～1990年撮影)" password="" authcfg="" zmin="15" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/gazo4/{z}/{x}/{y}.jpg" zmax="17"/>
+    <xyztiles username="" name="j_空中写真 (1961～1964年)" password="" authcfg="" zmin="15" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/ort_old10/{z}/{x}/{y}.png" zmax="17"/>
+    <xyztiles username="" name="k_空中写真 (1945～1950年)" password="" authcfg="" zmin="15" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/ort_USA10/{z}/{x}/{y}.png" zmax="17"/>
+    <xyztiles username="" name="l_簡易空中写真 (2004年～)" password="" authcfg="" zmin="5" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/airphoto/{z}/{x}/{y}.png" zmax="18"/>
+    <xyztiles username="" name="m_活断層図（都市圏活断層図）" password="" authcfg="" zmin="11" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/afm/{z}/{x}/{y}.png" zmax="16"/>
+    <xyztiles username="" name="n_土地利用図" password="" authcfg="" zmin="11" referer="" url="https://cyberjapandata.gsi.go.jp/xyz/lum200k/{z}/{x}/{y}.png" zmax="14"/>
+    <xyztiles username="" name="o_MIERUNE Color" password="" authcfg="" zmin="0" referer="" url="https://tile.mierune.co.jp/mierune/{z}/{x}/{y}.png" zmax="18"/>
+    <xyztiles username="" name="p_MIERUNE MONO" password="" authcfg="" zmin="0" referer="" url="https://tile.mierune.co.jp/mierune_mono/{z}/{x}/{y}.png" zmax="18"/>
+</qgsXYZTilesConnections>

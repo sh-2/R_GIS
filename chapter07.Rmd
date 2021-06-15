@@ -1,0 +1,172 @@
+```{r, message=FALSE, echo=FALSE}
+library(tmap)
+library(mapview)
+library(stars)
+tmap_mode("view")
+library(dplyr)
+```
+
+
+
+# starsとラスターデータ
+
+**starsパッケージについて**  
+starsパッケージとはラスターデータを扱うためのパッケージです。ラスターを扱うパッケージはraster, terra等がありますが、sfと同じ開発者の元作成されているため、sfと相性が良く似たような操作性です。このサイトではraster, terraを扱いません。  
+
+<br />
+
+**ラスターファイルの構造**  
+ラスターデータの代表的な拡張子は.tif, .png等です。
+
+## ラスターファイルの読み込み
+
+ラスターデータはstarsパッケージの`read_stars`関数で読み込めます。使用するラスターデータはGoogle Earth Enginから取得したDMSPデータを使用します。(配布検討。chapter2でGoogle Earth Engineのコードを紹介済み)
+```{r message=FALSE}
+library(stars)
+nightlight <- read_stars("DMSP_nightlight_tokyo.tif")
+```
+
+一度データの中身を見てみましょう
+```{r message=FALSE}
+nightlight
+```
+<br />
+上から順に見ていきましょう
+
++ データはstars objectとされx,y,bandの三次元の構造です。1 attributeとはDMSP_nightlight_tokyo.tifのことを示しています。ラスターデータは一つのファイルの中に複数のattibuteを持つことができます。(後で2つめのattributeを作ってみます。)
++ ラスターデータは細かいピクセルの集まりなので、数が大きい場合はsummaryでは一部の情報のみを扱うことがあります。
++ from / to / offset...は[こちら](https://keen-swartz-3146c4.netlify.app/raster.html#raster-data)を参考にしてください
++ x,yに続く3次元目"band"は夜間光の種類を表しています。このラスターデータでは光と雲の計測データが入っています。時系列データの場合はここがdateという変数で、複数日分のデータが格納されていることがあります。今回はband 1(光)しか使わないのであまり気にしないでください。
+
+<br />
+
+またDMSP_nightlight_tokyo.tifという名前は長すぎるので`setNames`関数でlightという名前に変えておきましょう
+```{r}
+nightlight <- setNames(nightlight, "light") 
+```
+
+<br />
+ラスターデータにもCRSは関わってきます。refwayがそれを示しています。sfデータと組み合わせて使う際はCRSを合わせる必要があるので、sfデータと同じようにst_transformで変換しておきましょう
+```{r}
+nightlight_UTM <- st_transform(nightlight, 32654)
+```
+
+
+```{r}
+#確認
+nightlight_UTM
+```
+
+<br />
+`st_dimensions`という関数を使えば次元を取得することができます。
+```{r message=FALSE}
+#dimensionを取得
+dimension <- st_dimensions(nightlight_UTM)
+
+#str関数で詳細を見られます。
+str(dimension)
+```
+
+<br />
+`st_get_dimension_values`もおなじように取得できます(たくさん方法がありますね)
+```{r}
+#DMSPはbandが2つあります
+st_get_dimension_values(nightlight_UTM, "band")
+```
+
+## 描写
+sfデータのときと同様に様々な方法でラスターデータを描写できます。(CRSをUTMに変えると表示されない場合があります。)
+
+```{r}
+#2つ分のbandが表示されます。
+plot(nightlight)
+```
+
+
+```{r message=FALSE}
+tmap_mode("view")
+mapview(nightlight)
+```
+
+<br />
+mapviewでは複数のband / dateなどの表示に対応していません。どうしても表示したい場合は、　次のセクションで紹介するfilter関数を使う必要あります。
+
+
+```{r message=FALSE}
+tmap_leaflet(
+  tm_shape(nightlight[,,,2]) + 
+    #[attribute, x, y, band]の指定をしています
+  tm_raster()
+)
+```
+
+<br />
+tmapではattribute, bandを指定することができます。
+
+## starsとdplyr
+starsデータもそのままdplyrを使用することができます。  
+
+### filter
+```{r}
+filter(nightlight, x < 140) %>% plot()
+```
+
+<br />
+x座標(経度)を140未満の範囲に限定して表示しました。  
+
+
+bandのfilterをかければmapviewでもband2を表示させることができます。
+```{r message=FALSE}
+filter(nightlight, band > 1) %>%
+  mapview()
+```
+
+### mutate
+mutate関数を使えば、attributeを追加できます。lightを50倍した変数を作ってみましょう
+```{r message=FALSE}
+#light_50を作る
+nightlight <- mutate(nightlight, light_50 = light * 50)
+
+#変数の確認
+nightlight
+```
+<br />
+light_50というattributeが作成されています。
+
+### select
+select関数は、attributeを指定することができます。light_50のみを抜き出してみましょう
+```{r}
+#light_50のみをattributeとして持つnightlight_selectを作る
+nightlight_select <- select(nightlight, light_50)
+
+#確認
+nightlight_select
+```
+
+## 書き出し
+starsデータもsfと同じように書き出すことができます。関数は`write_stars`を使います。
+
+<br />
+`write_stars`使い方
+```
+write_stars(ラスターデータ[保存する次元等], "保存するパスとファイル名")
+```
+
+具体的に、先ほど作成したlight_50を保存してみます。
+```{r}
+write_stars(nightlight["light_50",,,], "./write_Data/nightlight_50.tif")
+```
+これで保存ができました。write_dataのフォルダ内にnightlight_50というラスターファイルが保存されているはずです。
+
+<br />
+では、保存したラスターデータを読み込んでみましょう。
+```{r}
+light_50 <- read_stars("write_Data/nightlight_50.tif")
+```
+
+```{r echo=FALSE}
+light_50
+```
+nightlight_50の中身を見てわかるとおり、write_starsによる書き出しでは、attributeは一つしか保存できません。(また3次元目がdateの場合、全てのdateを保存することもできません・)なのでラスターデータを保存する際は、「全データをそのまま全ては保存できない」
+ことは覚えておいてください。
+

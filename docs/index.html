@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>RでGIS分析</title>
+  <meta name="description" content="sf, starsパッケージを用いてR/RstudioのみでGIS分析を行います。" />
+  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="RでGIS分析" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="sf, starsパッケージを用いてR/RstudioのみでGIS分析を行います。" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="RでGIS分析" />
+  
+  <meta name="twitter:description" content="sf, starsパッケージを用いてR/RstudioのみでGIS分析を行います。" />
+  
+
+<meta name="author" content="sh-2" />
+
+
+<meta name="date" content="2021-06-15" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+
+<link rel="next" href="なぜrでgis分析.html"/>
+<script src="libs/header-attrs-2.8/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">RでGIS分析</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>初めに</a></li>
+<li class="chapter" data-level="1" data-path="なぜrでgis分析.html"><a href="なぜrでgis分析.html"><i class="fa fa-check"></i><b>1</b> なぜRでGIS分析</a></li>
+<li class="chapter" data-level="2" data-path="rによるgis分析の例.html"><a href="rによるgis分析の例.html"><i class="fa fa-check"></i><b>2</b> RによるGIS分析の例</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="ベクターデータshapeファイル.html"><a href="ベクターデータshapeファイル.html"><i class="fa fa-check"></i><b>2.1</b> ベクターデータ(shapeファイル)</a></li>
+<li class="chapter" data-level="2.2" data-path="ラスターデータ.html"><a href="ラスターデータ.html"><i class="fa fa-check"></i><b>2.2</b> ラスターデータ</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="gisの全体像.html"><a href="gisの全体像.html"><i class="fa fa-check"></i><b>3</b> GISの全体像</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="ベクターデータ.html"><a href="ベクターデータ.html"><i class="fa fa-check"></i><b>3.1</b> ベクターデータ</a></li>
+<li class="chapter" data-level="3.2" data-path="ラスターデータ-1.html"><a href="ラスターデータ-1.html"><i class="fa fa-check"></i><b>3.2</b> ラスターデータ</a></li>
+<li class="chapter" data-level="3.3" data-path="座標系crs.html"><a href="座標系crs.html"><i class="fa fa-check"></i><b>3.3</b> 座標系(CRS)</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="sfとベクターデータ.html"><a href="sfとベクターデータ.html"><i class="fa fa-check"></i><b>4</b> sfとベクターデータ</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="シェープファイルの読み込み.html"><a href="シェープファイルの読み込み.html"><i class="fa fa-check"></i><b>4.1</b> シェープファイルの読み込み</a></li>
+<li class="chapter" data-level="4.2" data-path="crsの変更.html"><a href="crsの変更.html"><i class="fa fa-check"></i><b>4.2</b> CRSの変更</a></li>
+<li class="chapter" data-level="4.3" data-path="sfデータの描写.html"><a href="sfデータの描写.html"><i class="fa fa-check"></i><b>4.3</b> sfデータの描写</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="ベクターデータの操作.html"><a href="ベクターデータの操作.html"><i class="fa fa-check"></i><b>5</b> ベクターデータの操作</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="sfとdplyr.html"><a href="sfとdplyr.html"><i class="fa fa-check"></i><b>5.1</b> sfとdplyr</a>
+<ul>
+<li class="chapter" data-level="5.1.1" data-path="sfとdplyr.html"><a href="sfとdplyr.html#select"><i class="fa fa-check"></i><b>5.1.1</b> select</a></li>
+<li class="chapter" data-level="5.1.2" data-path="sfとdplyr.html"><a href="sfとdplyr.html#filter"><i class="fa fa-check"></i><b>5.1.2</b> filter</a></li>
+<li class="chapter" data-level="5.1.3" data-path="sfとdplyr.html"><a href="sfとdplyr.html#mutate"><i class="fa fa-check"></i><b>5.1.3</b> mutate</a></li>
+<li class="chapter" data-level="5.1.4" data-path="sfとdplyr.html"><a href="sfとdplyr.html#group_by-と-summarize"><i class="fa fa-check"></i><b>5.1.4</b> group_by と summarize</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="sfパッケージの基本関数.html"><a href="sfパッケージの基本関数.html"><i class="fa fa-check"></i><b>5.2</b> sfパッケージの基本関数</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="sfパッケージの基本関数.html"><a href="sfパッケージの基本関数.html#バッファー"><i class="fa fa-check"></i><b>5.2.1</b> バッファー</a></li>
+<li class="chapter" data-level="5.2.2" data-path="sfパッケージの基本関数.html"><a href="sfパッケージの基本関数.html#面積"><i class="fa fa-check"></i><b>5.2.2</b> 面積</a></li>
+<li class="chapter" data-level="5.2.3" data-path="sfパッケージの基本関数.html"><a href="sfパッケージの基本関数.html#重心"><i class="fa fa-check"></i><b>5.2.3</b> 重心</a></li>
+<li class="chapter" data-level="5.2.4" data-path="sfパッケージの基本関数.html"><a href="sfパッケージの基本関数.html#線長"><i class="fa fa-check"></i><b>5.2.4</b> 線長</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="書き出し.html"><a href="書き出し.html"><i class="fa fa-check"></i><b>5.3</b> 書き出し</a></li>
+<li class="chapter" data-level="5.4" data-path="sfとcsv.html"><a href="sfとcsv.html"><i class="fa fa-check"></i><b>5.4</b> sfとCSV</a></li>
+<li class="chapter" data-level="5.5" data-path="sf-非sfへの変換.html"><a href="sf-非sfへの変換.html"><i class="fa fa-check"></i><b>5.5</b> sf ⇔ 非sfへの変換</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="sfデータ-sfデータの操作.html"><a href="sfデータ-sfデータの操作.html"><i class="fa fa-check"></i><b>6</b> sfデータ × sfデータの操作</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="ポイントとポリゴン.html"><a href="ポイントとポリゴン.html"><i class="fa fa-check"></i><b>6.1</b> ポイントとポリゴン</a></li>
+<li class="chapter" data-level="6.2" data-path="ラインとポリゴン.html"><a href="ラインとポリゴン.html"><i class="fa fa-check"></i><b>6.2</b> ラインとポリゴン</a></li>
+<li class="chapter" data-level="6.3" data-path="join.html"><a href="join.html"><i class="fa fa-check"></i><b>6.3</b> join</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="join.html"><a href="join.html#ポリゴンからポイントへ抽出"><i class="fa fa-check"></i><b>6.3.1</b> ポリゴンからポイントへ抽出</a></li>
+<li class="chapter" data-level="6.3.2" data-path="join.html"><a href="join.html#ポイントからポリゴンへ抽出"><i class="fa fa-check"></i><b>6.3.2</b> ポイントからポリゴンへ抽出</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="starsとラスターデータ.html"><a href="starsとラスターデータ.html"><i class="fa fa-check"></i><b>7</b> starsとラスターデータ</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="ラスターファイルの読み込み.html"><a href="ラスターファイルの読み込み.html"><i class="fa fa-check"></i><b>7.1</b> ラスターファイルの読み込み</a></li>
+<li class="chapter" data-level="7.2" data-path="描写.html"><a href="描写.html"><i class="fa fa-check"></i><b>7.2</b> 描写</a></li>
+<li class="chapter" data-level="7.3" data-path="starsとdplyr.html"><a href="starsとdplyr.html"><i class="fa fa-check"></i><b>7.3</b> starsとdplyr</a>
+<ul>
+<li class="chapter" data-level="7.3.1" data-path="starsとdplyr.html"><a href="starsとdplyr.html#filter-1"><i class="fa fa-check"></i><b>7.3.1</b> filter</a></li>
+<li class="chapter" data-level="7.3.2" data-path="starsとdplyr.html"><a href="starsとdplyr.html#mutate-1"><i class="fa fa-check"></i><b>7.3.2</b> mutate</a></li>
+<li class="chapter" data-level="7.3.3" data-path="starsとdplyr.html"><a href="starsとdplyr.html#select-1"><i class="fa fa-check"></i><b>7.3.3</b> select</a></li>
+</ul></li>
+<li class="chapter" data-level="7.4" data-path="書き出し-1.html"><a href="書き出し-1.html"><i class="fa fa-check"></i><b>7.4</b> 書き出し</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="ラスターデータからベクターデータへの抽出.html"><a href="ラスターデータからベクターデータへの抽出.html"><i class="fa fa-check"></i><b>8</b> ラスターデータからベクターデータへの抽出</a></li>
+<li class="chapter" data-level="" data-path="最後に.html"><a href="最後に.html"><i class="fa fa-check"></i>最後に</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">RでGIS分析</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="header">
+<h1 class="title">RでGIS分析</h1>
+<p class="author"><em>sh-2</em></p>
+<p class="date" style="margin-top: 1.5em;"><em>2021-06-15</em></p>
+</div>
+<div id="初めに" class="section level1 unnumbered">
+<h1>初めに</h1>
+<p>このサイトでは、Rを用いてGIS分析を行う方法を解説していきます。QGIS等のGUIは用いずにR単体で作業できるようになることを目標としています。ただし深入りはせずに概要を掴むためのサイトにしていこうと思っています。このサイトで解説するパッケージは主にsf, starsパッケージです。 (sp, terra, rasterは扱いません。)<br />
+なお、多少R / Rstudioを触ったことのある読者を想定しています。</p>
+<p><br /></p>
+<p><strong>事前準備</strong><br />
+このサイトで使用するソフトはR/Rstudioのみを使います。(一部使用するGoogle Earth EngineにはJava scriptが必要ですが、このサイトでは特に覚える必要はありません。)
+<br />
+分析には、以下5つのパッケージを使用します。あらかじめインストールしてください。</p>
+<ul>
+<li>sf
+<ul>
+<li>ベクターデータ（シェープファイル）を扱います。</li>
+</ul></li>
+<li>stars
+<ul>
+<li>ラスターデータを扱います。</li>
+</ul></li>
+<li>mapview
+<ul>
+<li>データの描写</li>
+</ul></li>
+<li>tmap
+<ul>
+<li>データの描写<br />
+</li>
+</ul></li>
+<li>dplyr
+<ul>
+<li>読み込んだデータの操作等</li>
+</ul></li>
+</ul>
+<p><br /></p>
+<p><strong>インストールエラー時の対処法</strong></p>
+<p><code>install.packages</code>を行う際にエラーが出た場合、以下を試してみてください(Windowsの場合).</p>
+<p>OS(C:) → Program Files → R → R-version → library<br />
+libraryで右クリックしプロパティを開く。<br />
+セキュリティの項目からUserを選択。<br />
+アクセス許可を編集するため「編集」選択。<br />
+「編集」「読み取りと実行」を許可にチェックを入れ適用、OKを押す。</p>
+<p>この後でもう一度<code>install.packages</code>を実行してみてください。</p>
+<p><br /></p>
+<p><strong>作業環境 2021年2月現在</strong></p>
+<ul>
+<li>Windows 10 64bit</li>
+<li>R x64 4.0.3</li>
+<li>Rstudio 1.4.1103</li>
+</ul>
+<p><br /></p>
+<p><strong>参考</strong></p>
+<p>Taro Mieno. 2020. <em>R as GIS</em>.<a href="https://tmieno2.github.io/R-as-GIS-for-Economists/" class="uri">https://tmieno2.github.io/R-as-GIS-for-Economists/</a></p>
+<p>国土地理院 <em>GISとは</em> .<a href="https://www.gsi.go.jp/GIS/whatisgis.html" class="uri">https://www.gsi.go.jp/GIS/whatisgis.html</a></p>
+<p>Pebesma, E., 2018. <em>Simple Features for R: Standardized Support for Spatial Vector Data. The R Journal 10 (1), 439-446</em>.<a href="https://doi.org/10.32614/RJ-2018-009" class="uri">https://doi.org/10.32614/RJ-2018-009</a></p>
+<p>Pebesma, E., <em>Spatiotemporal Arrays: Raster and Vector Datacubes</em>.<a href="https://r-spatial.github.io/stars/index.html%5D" class="uri">https://r-spatial.github.io/stars/index.html]</a></p>
+<p>Edzer Pebesma, Roger Bivand., 2020. <em>Spatial Data Science</em>.<a href="https://keen-swartz-3146c4.netlify.app/" class="uri">https://keen-swartz-3146c4.netlify.app/</a></p>
+<p>「GIS実習オープン教材」<a href="https://gis-oer.github.io/gitbook/book/" class="uri">https://gis-oer.github.io/gitbook/book/</a></p>
+<p>GIS基礎解説 ESRIジャパン<a href="https://www.esrij.com/gis-guide/coordinate-and-spatial/coordinate-system/" class="uri">https://www.esrij.com/gis-guide/coordinate-and-spatial/coordinate-system/</a></p>
+<p>Rを使った地理空間データの可視化と分析 <a href="https://tsukubar.github.io/r-spatial-guide/spatial-data-mapping.html#tmap%E3%81%AB%E3%82%88%E3%82%8B%E4%B8%BB%E9%A1%8C%E5%9B%B3%E4%BD%9C%E6%88%90" class="uri">https://tsukubar.github.io/r-spatial-guide/spatial-data-mapping.html#tmap%E3%81%AB%E3%82%88%E3%82%8B%E4%B8%BB%E9%A1%8C%E5%9B%B3%E4%BD%9C%E6%88%90</a></p>
+<p>biostatistics R / dplyr パッケージによるデータ操作と集計<a href="https://stats.biopapyrus.jp/r/tidyverse/dplyr.html" class="uri">https://stats.biopapyrus.jp/r/tidyverse/dplyr.html</a></p>
+<p>土井　翔平 2021 Rで計量政治学入門 <a href="https://shohei-doi.github.io/quant_polisci/pipe.html" class="uri">https://shohei-doi.github.io/quant_polisci/pipe.html</a></p>
+<p>Rのtmapパッケージでインタラクティブな主題図の作成&amp;ウェブ上での公開 <a href="https://qiita.com/ocean_f/items/700aff67f3e35266b0fe" class="uri">https://qiita.com/ocean_f/items/700aff67f3e35266b0fe</a></p>
+
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+
+<a href="なぜrでgis分析.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection",
+"scroll_highlight": true,
+"download": ["pdf", "epub"]
+}
+});
+});
+</script>
+
+</body>
+
+</html>

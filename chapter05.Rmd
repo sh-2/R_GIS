@@ -1,0 +1,330 @@
+```{r include=FALSE}
+library(sf)
+library(tmap)
+library(dplyr)
+library(data.table)
+tmap_mode("view")
+tokyo23 <- st_read("tokyo/tokyo_23ku_jgd2011_9.shp") %>%
+  st_transform(32654)
+```
+
+
+# ベクターデータの操作
+ここから読み込んだベクターデータの基本的な操作を説明していきます。
+
+## sfとdplyr
+sfデータはそのまま`dplyr`パッケージを使用することができます。dplyrはデータを操作することに長けたパッケージで使い勝手が良いため重宝されています。いくつかdplyrの関数を見ていきましょう。
+```{r, results='hide'}
+library(dplyr)
+```
+
+
+### select
+`select`関数は特定の列を抜き出します。
+```{r}
+tokyo23 %>% select("name", "population")
+```
+
+nameとpoplationだけ抜き出せました。
+
+### filter
+`filter`関数は条件を指定してそのデータだけを抽出します。  
+例として人口が700000人以上の地域だけを抽出します・
+```{r}
+tokyo23 %>% filter(population > 700000)
+```
+featureが23から3まで減っています。2011年当時では人口70万人を超える区は3つしかないようです。
+
+### mutate
+`mutate`関数は新しく変数を作る際に便利な関数です。
+
++ 人口が30万未満はS
++ 人口が30万~60万未満はM
++ 人口が60万以上はL
+
+とするpop_categoryという変数を作ってみましょう
+
+```{r}
+tokyo23_category <- tokyo23 %>%
+  mutate(pop_category = case_when(population < 300000 ~ "S",
+                                  population >= 300000 & population< 600000 ~ "M",
+                                  population >= 600000  ~ "L"
+                                  )
+  )
+```
+
+ 新しい変数pop_categoryが追加されたtokyo23_categoryというsfデータが作成できました。  
+ pop_categoryで色分けした図も示しておきます。
+```{r}
+tokyo23_category[,"pop_category"] %>%
+  plot()
+```
+
+23区の中心ほど、人が住んでいないことが分かります。（おそらくSの区は昼間人口が多い地域なはずです。）
+
+### group_by と summarize
+`group_by`関数は変数ごとにグループを作ります。例えばpop_categoryをS,M,CLに分けて結果が出力されます。  
+`summarize`関数はデータ集計を行う関数です。この二つは組み合わせて使うことが多いので、まとめて見ていきましょう
+```{r message=FALSE}
+tokyo23_category %>%
+  
+#pop_categoryのグループを作ります  
+  group_by(pop_category) %>%
+  
+#areaとdensityの平均を求めます
+  summarise(area_ave = mean(area),
+            density_ave = mean(density))
+  
+
+```
+area_aveとdensity_aveの2つの集計が出来ました。  
+M,LはMULTIPOLYGONでSだけPOLYGONとなっています。これはM,Lのポリゴンが飛び飛びなのに対し、Sのみ隣接し合っており、単一のポリゴンとして集計されたためです。
+
+## sfパッケージの基本関数
+
+### バッファー
+バッファーはポイント等の周辺情報を得るために使われます。まずはバッファーを作成するためのポイントデータを読み込んでみましょう
+```{r message=FALSE, results='hide'}
+post <- st_read("tokyo/post_office_9kei.shp") %>%
+  st_transform(32654)
+```
+```{r}
+tm_shape(post) +
+  tm_symbols(col = "blue", size=0.1)
+```
+これは郵便局のポイントデータです。これに300メートルのバッファーを追加してみましょう。`st_buffer`を使います
+
+`st_buffer`の使い方
+```
+st_buffer(sfデータ, dist=バッファーの距離)
+```
+```{r}
+post_buffer <- st_buffer(post, 300)
+```
+これでバッファーが出来ました。図で見てみましょう。
+
+```{r}
+#post_bufferを透明で表示
+tm_shape(post_buffer) +
+  tm_symbols(alpha = 0) +
+
+#postを青色で重ねて表示
+tm_shape(post) +
+  tm_symbols(col = "blue", size=0.1)
+
+```
+post(青色)の300m周辺にpost_bufferが広がっているのが分かると思います。  
+ポイントデータは大きさを持っていませんでしたが、バッファーを付与したことで、post_bufferは半径300mの円のポリゴンデータとなりました。  
+
+<br />
+バッファーはポリゴンにもかけることができます。23区の一部を取り出して見て見ましょう。
+```{r}
+#3区のみのデータを作成
+ku3 <- tokyo23 %>%
+  filter(name %in% c("shibuya", "minato", "bunkyo")) 
+
+#ku3の描写
+tm_shape(ku3) +
+  tm_polygons('name', palette="Spectral", contrast=0.5, title="city") +
+  tm_layout(frame = NA)
+```
+
+st_bufferを行い、buffer後のものを表示
+```{r}
+#bufferをかける
+ku3_buffer <- st_buffer(ku3, dist = 500)
+
+#ku3_bufferの表示
+tm_shape(ku3_buffer) +
+  tm_polygons(col='blue',alpha=0.1) +
+  
+
+#ku3を重ねて表示
+tm_shape(ku3) +
+  tm_polygons('name', palette="Spectral", contrast=.5, title="city") +
+  tm_layout(
+    legend.outside=TRUE,
+    frame=FALSE)
+```
+
+### 面積
+ポリゴンの面積は`st_area`で簡単に出すことができます。  
+
+
+`st_buffer`の使い方
+```
+st_area(sfデータ)
+```
+tokyo23の中にarea2という変数を作って確かめてみましょう。
+```{r}
+tokyo23 <- tokyo23 %>%
+  mutate(tokyo23, area2 = st_area(tokyo23))
+```
+tokyo23のareaとare2を確認すると若干の誤差はありますが、ほぼ同じ値になりました。正しく面積が計算されたことを示しています。
+ただしarea2の表記に[m^2]が表示されているように、st_areaではnumericとして出力されません。
+```{r}
+class(tokyo23$area2)
+```
+
+as.numericを使うだけで簡単にnumeric型に変換できます。
+```{r}
+#numeric型に変換
+tokyo23 <- mutate(tokyo23, area2 = as.numeric(area2))
+
+#classの確認
+class(tokyo23$area2)
+```
+
+
+### 重心
+`st_centroid`でポリゴン内の重心を求められます。ラベルを張る際などに重心が分かっていると役に立ちます。なお、st_centroidを使うとポイントデータとして出力されます。　　
+　
+`st_centroid`使い方
+```
+st_centroid(sfデータ)
+```
+
+```{r results='hide'}
+#重心を求める
+tokyo23_centroid <- st_centroid(tokyo23)
+```
+```{r}
+#重心にnameを重ねて表示
+tm_shape(tokyo23) +
+  tm_polygons() +
+tm_shape(tokyo23_centroid)+
+  tm_text("name", size=0.8) +
+tm_layout(
+    legend.outside=TRUE,
+    frame=FALSE
+  )
+
+```
+
+### 線長
+`st_length`を使えばラインの長さを求めることができます。  
+例として線路のデータを使います
+```{r message=FALSE, include=FALSE}
+river <- st_read("tokyo/river_9kei.shp") %>%
+  st_transform(32654)
+```
+
+`st_length`の使い方
+```
+st_length(ラインのsfデータ)
+```
+
+```{r}
+#線路の長さを出力します。
+rail <- mutate(river, length = st_length(river))
+```
+railの中でlengthという変数が作成されているので、各自確認してみましょう。
+
+## 書き出し
+作成したsfデータを別の統計ソフトで使いたい時や、誰かと共有したい時があると思います。そんな時はデータを書き出して保存することができます。使用する関数は`st_write`です。例として、先ほど作成した**ku3**を書き出してみます。
+
+<br />
+`st_write`使い方
+```
+st_write(書き出すデータ dsn="保存先のフォルダ名", "書き出したデータの名前", driver="ESRI Shapefile", append = FALSE)
+```
+シェープファイルで保存するので、driverはESRI Shapefileのままで構いません。書き出すデータ名が既に存在する場合は、appendをFALSEにしておくと上書きがされます。  
+
+では書き出してみましょう。
+```{r eval=FALSE, echo=TRUE}
+st_write(ku3, dsn="./write_Data", "ku3_shp_write", driver="ESRI Shapefile", append = FALSE)
+```
+
+これでwork directory内にwrite_dataというフォルダが作成され、その中にku3_write_shpというシェープファイルが出来ていると思います。  
+このシェープファイルは、通常のシェープファイルと同じように他のソフトでも扱うことができます。
+
+<br />
+CSV形式で書き出したい時は、以下の様なコードで書き出すことができます。ただしgeometryの変数は全て消されてしまうため位置情報を必要とする作業を終えてから書き出すようにしましょう。  
+(うまく行かない場合があるので修正中です。上書きするときは「ku3_csv_writ」のフォルダを消してから実行してみてください。)
+```{r eval=FALSE, echo=TRUE}
+#うまく行かない
+#st_write(ku3, dsn="./write_Data", "ku3_csv_write", driver="ESRI Shapefile", append = FALSE)
+
+#上書きで無ければうまく行く模様
+st_write(ku3, "write_Data/ku3_csv_write", driver="CSV", append = FALSE)
+```
+
+
+
+
+
+## sfとCSV
+ベクターデータは必ずしもシェープファイル(.shp)で用意されていない場合もあります。例えばCSVファイルに地理情報が用意されている場合があります。その時の対処法を説明します。  
+
+tokyoフォルダの中に、post_officeというCSVファイルがあると思います。中身を確認してみると、`name`,`Latitude`,`Longitude`の3変数があります。このうち、`Latitude`,`Longitude`と`st_as_sf`関数を使えば簡単にベクターデータとして読み込むことができます。  
+まずはCSVファイルを読み込みます。
+```{r message=FALSE}
+#CSVファイルの読み込み
+library(readr)
+post_CSV <- read_csv("tokyo/post_office.csv")
+
+#データの確認
+class(post_CSV)
+```
+<br />
+このように、ただCSVを読み込んだだけではsfデータとはなりません。次に`st_as_sf`を使ってsfデータに変更します。
+
+<br />
+`st_as_sf`使い方
+```
+st_as_sf(非sfデータ, coords = c("経度", "緯度"), crs = デフォルトのCRS)
+```
+GPSの(一般的な)CRSは4326で定義されます。そのため、このデフォルトのCRSは4326で構いません。
+
+post_CSVに上の例を当てはめると、以下のようになります。
+```{r}
+#sfデータに変換
+post_CSV <- st_as_sf(post_CSV, coords = c("Longitude", "Latitude"), crs = 4326)
+
+#classの確認
+class(post_CSV)
+```
+<br />
+
+classはしっかりsfデータに変換されていますね。  
+post_CSVを表示して適切なsfデータになっているか確認してみましょう。
+```{r}
+tm_shape(post_CSV) +
+  tm_dots()
+```
+
+<br />
+これでCSVをsfデータとして読み込むことが出来ました。
+
+## sf ⇔ 非sfへの変換
+sfデータは`data.table`などを使って通常のデータフレームに変換することも簡単にできます。ku3を例として変換を行ってみましょう。
+
+```{r}
+class(ku3)
+```
+
+まずku3はsfデータとなっています。data.tableで変換してみましょう。
+```{r}
+#data.tableに変換
+ku3_dt <- data.table(ku3)
+
+#classの確認
+class(ku3_dt)
+```
+<br />
+ku3_dtはdata.tableとして変換されました。  
+data.tableを使う利点としては、dplyrよりも高速で、大きなファイルを扱いやすい点です。(初心者向けにはdplyrでも十分作業ができるのであくまで参考程度ですが。)  
+
+<br />
+data.tableからsfデータに戻す方法も簡単です。`st_as_sf`を使うだけです。
+```{r}
+#sfに変換
+ku3_sf <- st_as_sf(ku3_dt)
+
+#classの確認
+class(ku3_sf)
+```
+<br />
+これでsfデータの再変換が簡単にできました。
+もし大規模なシェープファイルを扱いたい場合は、一度data.tableに変換し、処理を施した後にsfデータに戻して作業を行うと効率的に、進められるかもしれません。  
+ここではdata.tableの変換だけを説明しました。data.tableの詳しい操作は各自調べるようにお願いします。
